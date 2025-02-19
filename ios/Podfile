@@ -1,8 +1,17 @@
+# Definir la versión mínima de iOS
 platform :ios, '13.0'
 
+# Ignorar las advertencias de CocoaPods (opcional, pero útil)
+install! 'cocoapods', :deterministic_uuids => false
+
+# Definir el target principal
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
+
+  # Asegurar que Flutter esté correctamente configurado
+  flutter_root = File.expand_path('..', File.dirname(__FILE__))
+  load File.join(flutter_root, 'flutter', 'tools', 'podhelper.rb')
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
