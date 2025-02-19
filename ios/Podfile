@@ -8,13 +8,9 @@ target 'Runner' do
 
   # Ruta correcta del SDK de Flutter
   flutter_root = File.expand_path('..', File.dirname(__FILE__))
+  flutter_application_path = File.absolute_path(File.join(flutter_root, '..'))
+  ios_frameworks_path = File.join(flutter_application_path, '.ios', 'Flutter')
 
-  # Verifica que el SDK de Flutter esté disponible
-  if File.exist?(File.join(flutter_root, 'Flutter', 'flutter_export_environment.sh'))
-    load File.join(flutter_root, 'Flutter', 'flutter_export_environment.sh')
-  end
-
-  # Instalar dependencias sin usar podhelper.rb
-  pod 'Flutter', :path => File.join(flutter_root, 'Flutter')
-
+  # Ahora referenciamos el SDK correctamente
+  pod 'Flutter', :path => File.join(ios_frameworks_path, 'engine')
 end
