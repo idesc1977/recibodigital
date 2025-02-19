@@ -1,0 +1,45 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal() // Opcional, para más compatibilidad
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:8.3.0" 
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.0"
+    }
+}
+
+plugins {
+    id 'com.google.gms.google-services' version '4.4.2' apply false
+}
+
+rootProject.buildDir = "../build"
+
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+
+subprojects {
+    project.evaluationDependsOn(":app")
+}
+
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
+}
+
+// 🔽 Agregar este bloque al final del archivo 🔽
+allprojects {
+    configurations.all {
+        resolutionStrategy.eachDependency { details ->
+            if (details.requested.group == 'org.jetbrains.kotlin') {
+                details.useVersion "2.1.0"
+            }
+        }
+    }
+
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
