@@ -1,17 +1,13 @@
 platform :ios, '13.0'
 
-# Ignorar advertencias de CocoaPods (opcional)
 install! 'cocoapods', :deterministic_uuids => false
 
-# Definir el target de la app
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
 
-  # Asegurar que Flutter esté correctamente configurado
   flutter_root = File.expand_path('..', File.dirname(__FILE__))
-  load File.join(flutter_root, '.flutter-plugins')
+  load File.join(flutter_root, 'Flutter', 'flutter_export_environment.sh')
 
-  # Instalar los pods de Flutter
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
