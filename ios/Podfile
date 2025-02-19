@@ -1,0 +1,20 @@
+platform :ios, '13.0'
+
+install! 'cocoapods', :deterministic_uuids => false
+
+target 'Runner' do
+  use_frameworks!
+  use_modular_headers!
+
+  # Ruta correcta del SDK de Flutter
+  flutter_root = File.expand_path('..', File.dirname(__FILE__))
+
+  # Verifica que el SDK de Flutter esté disponible
+  if File.exist?(File.join(flutter_root, 'Flutter', 'flutter_export_environment.sh'))
+    load File.join(flutter_root, 'Flutter', 'flutter_export_environment.sh')
+  end
+
+  # Instalar dependencias sin usar podhelper.rb
+  pod 'Flutter', :path => File.join(flutter_root, 'Flutter')
+
+end
