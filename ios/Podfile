@@ -6,8 +6,13 @@ target 'Runner' do
   use_frameworks!
   use_modular_headers!
 
+  # Cargar Flutter desde la ubicación predeterminada
   flutter_root = File.expand_path('..', File.dirname(__FILE__))
-  load File.join(flutter_root, 'Flutter', 'podhelper.rb')
+  if File.exist?(File.join(flutter_root, 'Flutter', 'flutter_export_environment.sh'))
+    load File.join(flutter_root, 'Flutter', 'flutter_export_environment.sh')
+  end
 
-  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+  # Instalar dependencias sin usar podhelper.rb
+  pod 'Flutter', :path => File.join(flutter_root, 'Flutter')
+
 end
