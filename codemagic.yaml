@@ -22,6 +22,9 @@ workflows:
         script: |
           flutter clean
           flutter pub get
+          flutter precache
+          flutter build ios --no-codesign
+
 
       - name: Instalar dependencias de iOS
         script: |
@@ -32,7 +35,7 @@ workflows:
 
       - name: Compilar IPA para iOS
         script: |
-          flutter build ios --no-codesign
+          flutter build ipa --no-codesign
 
       - name: Exportar binarios
         script: |
