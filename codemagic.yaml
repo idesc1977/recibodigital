@@ -23,14 +23,17 @@ workflows:
           flutter clean
           flutter pub get
           flutter precache
+          rm -rf ios/.ios  # 🔹 Borrar cualquier configuración corrupta
           flutter build ios --no-codesign  # 🔹 Esto generará .ios/Flutter/podhelper.rb
 
-      - name: Instalar dependencias de iOS
+      - name: Verificar que podhelper.rb fue creado correctamente
         script: |
-          cd ios
-          rm -rf Pods Podfile.lock
-          pod install --repo-update
-          cd ..
+          if [ ! -f ios/.ios/Flutter/podhelper.rb ]; then
+            echo "❌ ERROR: podhelper.rb no fue generado correctamente"
+            exit 1
+          else
+            echo "✅ podhelper.rb encontrado correctamente"
+          fi
 
       - name: Compilar IPA para iOS
         script: |
