@@ -3,6 +3,7 @@ workspace 'Runner.xcworkspace'
 platform :ios, '13.0'
 
 install! 'cocoapods', :deterministic_uuids => false
+pod 'FirebaseCore', :modular_headers => true
 
 target 'Runner' do
   use_frameworks!
