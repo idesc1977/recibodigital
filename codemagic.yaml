@@ -23,6 +23,12 @@ workflows:
           flutter clean
           flutter pub get
           
+      - name: Instalar dependencias de iOS
+        script: |
+          cd ios
+          pod repo update
+          pod install
+
       - name: Compilar IPA para iOS
         script: |
           flutter build ios --no-codesign
