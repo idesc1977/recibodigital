@@ -1,5 +1,16 @@
+workspace 'Runner.xcworkspace'
+
 platform :ios, '13.0'
 
-use_frameworks!
-use_modular_headers!
+install! 'cocoapods', :deterministic_uuids => false
 
+target 'Runner' do
+  use_frameworks!
+  use_modular_headers!
+
+  flutter_root = File.expand_path('..', File.dirname(__FILE__))
+  flutter_application_path = File.absolute_path(File.join(flutter_root, '..'))
+  ios_frameworks_path = File.join(flutter_application_path, '.ios', 'Flutter')
+
+  pod 'Flutter', :path => File.join(ios_frameworks_path, 'engine')
+end
