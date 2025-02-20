@@ -3,7 +3,11 @@ platform :ios, '13.0'
 use_frameworks!
 use_modular_headers!
 
-workspace 'Runner.xcworkspace' # <-- Esto soluciona el error del workspace
+workspace 'Runner.xcworkspace'  # Asegura que el workspace esté configurado
+
+# Asegurar que Flutter esté correctamente referenciado
+flutter_application_path = File.expand_path('..')
+load File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')
 
 target 'Runner' do
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
