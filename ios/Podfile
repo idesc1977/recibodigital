@@ -7,7 +7,13 @@ workspace 'Runner.xcworkspace'  # Asegura que el workspace esté configurado
 
 # Asegurar que Flutter esté correctamente referenciado
 flutter_application_path = File.expand_path('..')
-load File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')
+podhelper_path = File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')
+
+if File.exist?(podhelper_path)
+  load podhelper_path
+else
+  puts "⚠ WARNING: podhelper.rb no encontrado, omitiendo carga del archivo."
+end
 
 target 'Runner' do
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
