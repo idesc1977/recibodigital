@@ -8,8 +8,11 @@ target 'Runner' do
   use_frameworks!
   use_modular_headers!
 
-  # Asegurar compatibilidad con Flutter en Codemagic
-  flutter_install_all_ios_pods(File.dirname(File.realpath(__FILE__)))
+  # Incluir manualmente las dependencias de Flutter
+  pod 'Flutter', :path => '../Flutter'
+    
+  # Agregar manualmente los paquetes requeridos por Flutter
+  pod 'shared_preferences_foundation', :path => '.symlinks/plugins/shared_preferences_foundation/ios'
 
   post_install do |installer|
     installer.pods_project.targets.each do |target|
