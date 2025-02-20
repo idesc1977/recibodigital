@@ -2,22 +2,14 @@ workspace 'Runner.xcworkspace'
 
 platform :ios, '13.0'
 
-install! 'cocoapods', :disable_input_output_paths => true
+install! 'cocoapods', :deterministic_uuids => false
 
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
-
-  # Incluir manualmente las dependencias de Flutter
-  pod 'Flutter', :path => '../Flutter'
+  
+  flutter_root = File.expand_path('..', File.dirname(__FILE__))
+  flutter_application_path = File.absolute_path(File.join(flutter_root, '..'))
+  ios_frameworks_path = File.join(flutter_application_path, '.ios', 'Flutter')
     
-  # Agregar manualmente los paquetes requeridos por Flutter
-  pod 'shared_preferences_foundation', :path => '.symlinks/plugins/shared_preferences_foundation/ios'
-
-  post_install do |installer|
-    installer.pods_project.targets.each do |target|
-      flutter_additional_ios_build_settings(target)
-    end
-  end
 end
-
