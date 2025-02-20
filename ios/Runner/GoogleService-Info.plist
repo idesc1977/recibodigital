@@ -9,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.ar.emicardigital.recibo_digital</string>
+	<string>com.ar.emicardigital.reciboDigital</string>
 	<key>PROJECT_ID</key>
 	<string>recibo-digital-838ac</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:795591101758:ios:79b4abbefce7704248706f</string>
+	<string>1:795591101758:ios:103287adb328b90548706f</string>
 </dict>
 </plist>

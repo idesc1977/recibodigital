@@ -5,13 +5,9 @@ buildscript {
         gradlePluginPortal() // Opcional, para más compatibilidad
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:8.3.0" 
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.0"
+        classpath "com.android.tools.build:gradle:8.8.0" 
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.10"
     }
-}
-
-plugins {
-    id 'com.google.gms.google-services' version '4.4.2' apply false
 }
 
 rootProject.buildDir = "../build"
@@ -33,7 +29,7 @@ allprojects {
     configurations.all {
         resolutionStrategy.eachDependency { details ->
             if (details.requested.group == 'org.jetbrains.kotlin') {
-                details.useVersion "2.1.0"
+                details.useVersion "2.1.10"
             }
         }
     }

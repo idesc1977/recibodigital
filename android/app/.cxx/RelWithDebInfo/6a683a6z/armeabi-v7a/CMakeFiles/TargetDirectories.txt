@@ -1,0 +1,2 @@
+C:/inetpub/wwwroot/Flutter/recibo_digital_iOS/android/app/.cxx/RelWithDebInfo/6a683a6z/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/inetpub/wwwroot/Flutter/recibo_digital_iOS/android/app/.cxx/RelWithDebInfo/6a683a6z/armeabi-v7a/CMakeFiles/rebuild_cache.dir
