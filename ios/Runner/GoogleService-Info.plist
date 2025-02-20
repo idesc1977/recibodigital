@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyCEAH015WGYUiR8iuD9CScdtbEEVg0EdMY</string>
+	<key>GCM_SENDER_ID</key>
+	<string>795591101758</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.ar.emicardigital.recibodigital</string>
+	<key>PROJECT_ID</key>
+	<string>recibo-digital-838ac</string>
+	<key>STORAGE_BUCKET</key>
+	<string>recibo-digital-838ac.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:795591101758:ios:79b4abbefce7704248706f</string>
+</dict>
+</plist>
