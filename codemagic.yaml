@@ -1,3 +1,22 @@
+  workflows:
+  ios_release:
+    name: "Flutter iOS Build"
+    environment:
+      flutter: stable  # Puedes especificar una versión, por ejemplo, "3.16.0"
+      xcode: latest  # O una versión específica como "15.0"
+      cocoapods: default  # CocoaPods ya está instalado en Codemagic
+      vars:
+        BUNDLE_ID: "com.ar.emicardigital.recibo_digital"  # Reemplaza con tu Bundle ID
+
+    triggering:
+      events:
+        - push
+        - pull_request
+      branch_patterns:
+        - pattern: "*"
+          include: true
+          source: true
+  
   scripts:
 
     - name: Set up code signing settings on Xcode project
