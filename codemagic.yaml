@@ -23,15 +23,9 @@ workflows:
           flutter clean
           flutter pub get
 
-      - name: Forzar creación del Podfile y establecer iOS 13.0
+      - name: Instalar dependencias de iOS
         script: |
           cd ios
-          if [ ! -f Podfile ]; then
-            pod init
-          fi
-          echo 'platform :ios, "13.0"' > Podfile
-          echo 'use_frameworks!' >> Podfile
-          echo 'use_modular_headers!' >> Podfile
           pod install --repo-update
           cd ..
 

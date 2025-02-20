@@ -1,0 +1,10 @@
+platform :ios, '13.0'
+
+use_frameworks!
+use_modular_headers!
+
+workspace 'Runner.xcworkspace' # <-- Esto soluciona el error del workspace
+
+target 'Runner' do
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+end
