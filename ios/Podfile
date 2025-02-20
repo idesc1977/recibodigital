@@ -11,6 +11,5 @@ target 'Runner' do
   flutter_root = File.expand_path('..', File.dirname(__FILE__))
   flutter_application_path = File.absolute_path(File.join(flutter_root, '..'))
   ios_frameworks_path = File.join(flutter_application_path, '.ios', 'Flutter')
-  pod 'Flutter', :path => File.join(ios_frameworks_path, 'engine')
-  
+    
 end
