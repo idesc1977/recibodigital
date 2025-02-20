@@ -23,13 +23,15 @@ workflows:
           flutter clean
           flutter pub get
 
-      - name: Generar `Podfile` si no existe
+      - name: Generar `Podfile` si no existe y forzar iOS 13.0
         script: |
           cd ios
           if [ ! -f Podfile ]; then
             pod init
           fi
+          # Modificar el Podfile para establecer iOS 13.0
           sed -i '' 's/platform :ios, .*/platform :ios, "13.0"/' Podfile
+          echo 'platform :ios, "13.0"' >> Podfile
           pod install --repo-update
           cd ..
 
