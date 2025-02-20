@@ -1,0 +1,48 @@
+workflows:
+  ios_release:
+    name: "Flutter iOS Build"
+    environment:
+      flutter: stable  # Puedes especificar una versión, por ejemplo, "3.16.0"
+      xcode: latest  # O una versión específica como "15.0"
+      cocoapods: default  # CocoaPods ya está instalado en Codemagic
+      vars:
+        BUNDLE_ID: "com.ar.emicardigital.recibo_digital"  # Reemplaza con tu Bundle ID
+
+    triggering:
+      events:
+        - push
+        - pull_request
+      branch_patterns:
+        - pattern: "*"
+          include: true
+          source: true
+
+    scripts:
+      - name: Instalar dependencias de Flutter
+        script: |
+          flutter clean
+          flutter pub get
+
+      - name: Configurar CocoaPods en iOS
+        script: |
+          cd ios
+          rm -rf Pods Podfile.lock
+          pod install --repo-update
+          cd ..
+
+      - name: Compilar IPA para iOS
+        script: |
+          flutter build ios --no-codesign
+
+      - name: Exportar binarios
+        script: |
+          mkdir -p build_output
+          cp -r build/ios/iphoneos/ build_output/
+
+    artifacts:
+      - build_output/**
+
+    publishing:
+      email:
+        recipients:
+          - "mercedariodigital@gmail.com"  # Cambia esto para recibir notificaciones
