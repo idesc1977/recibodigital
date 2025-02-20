@@ -23,10 +23,13 @@ workflows:
           flutter clean
           flutter pub get
 
-      - name: Configurar CocoaPods en iOS
+      - name: Generar `Podfile` si no existe
         script: |
           cd ios
-          rm -rf Pods Podfile.lock
+          if [ ! -f Podfile ]; then
+            pod init
+          fi
+          sed -i '' 's/platform :ios, .*/platform :ios, "13.0"/' Podfile
           pod install --repo-update
           cd ..
 
