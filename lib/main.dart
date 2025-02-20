@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/login.dart';
 import 'screens/userdetails.dart';
@@ -11,9 +10,6 @@ import '../globals.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  //Pedir permisos en tiempo de ejecución
-  await requestNotificationPermission();
 
   // Inicializar variables globales
   resetGlobalVariables();
@@ -27,14 +23,6 @@ Future<void> main() async {
 Future<void> _clearChatHistory() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   await prefs.remove("chat_history"); // 🔥 Borra el historial del chat
-}
-
-Future<void> requestNotificationPermission() async {
-  if (await Permission.notification.request().isGranted) {
-    //print("✅ Permiso de notificación concedido");
-  } else {
-    //print("❌ Permiso de notificación denegado");
-  }
 }
 
 /// Clase principal de la aplicación
