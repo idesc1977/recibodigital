@@ -4,9 +4,6 @@ platform :ios, '13.0'
 
 install! 'cocoapods', :deterministic_uuids => false
 
-# Forzar la instalación de Firebase correctamente
-$FirebaseSDKVersion = '11.8.0' 
-
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
@@ -15,5 +12,5 @@ target 'Runner' do
   flutter_application_path = File.absolute_path(File.join(flutter_root, '..'))
   ios_frameworks_path = File.join(flutter_application_path, '.ios', 'Flutter')
 
-  pod 'Firebase/Core', $FirebaseSDKVersion
+  
 end
