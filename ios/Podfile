@@ -2,8 +2,19 @@ workspace 'Runner.xcworkspace'
 
 platform :ios, '13.0'
 
+install! 'cocoapods', :disable_input_output_paths => true
+
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
+
+  # Asegurar compatibilidad con Flutter en Codemagic
+  flutter_install_all_ios_pods(File.dirname(File.realpath(__FILE__)))
+
+  post_install do |installer|
+    installer.pods_project.targets.each do |target|
+      flutter_additional_ios_build_settings(target)
+    end
+  end
 end
 

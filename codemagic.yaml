@@ -6,7 +6,7 @@ workflows:
       xcode: latest  # O una versión específica como "15.0"
       cocoapods: default  # CocoaPods ya está instalado en Codemagic
       vars:
-        BUNDLE_ID: "com.ar.emicardigital.recibo_digital"  # Reemplaza con tu Bundle ID
+        BUNDLE_ID: "com.ar.emicardigital.recibodigital"  # Reemplaza con tu Bundle ID
 
     triggering:
       events:
