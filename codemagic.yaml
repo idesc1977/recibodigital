@@ -23,8 +23,17 @@ workflows:
           flutter clean
           flutter pub get
           flutter precache
-          flutter build ios --no-codesign
+          flutter build ios --no-codesign  # 🔹 Esto generará .ios/Flutter/podhelper.rb
 
+      - name: Verificar que podhelper.rb fue creado
+        script: |
+          #!/bin/bash
+          if [ ! -f .ios/Flutter/podhelper.rb ]; then
+            echo "⚠ ERROR: podhelper.rb no se generó correctamente"
+            exit 1
+          else
+            echo "✅ podhelper.rb encontrado correctamente"
+          fi
 
       - name: Instalar dependencias de iOS
         script: |
