@@ -30,7 +30,6 @@ workflows:
       - name: Instalar dependencias de iOS
         script: |
           cd ios
-          rm -rf Pods Podfile.lock .symlinks Flutter/Flutter.framework
           pod repo update
           pod install
 

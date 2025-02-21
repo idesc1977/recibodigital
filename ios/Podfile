@@ -7,6 +7,8 @@ target 'Runner' do
   use_frameworks!
   use_modular_headers!
   
+  pod 'shared_preferences_foundation'
+  
   flutter_root = File.expand_path('..', File.dirname(__FILE__))
   flutter_application_path = File.absolute_path(File.join(flutter_root, '..'))
   ios_frameworks_path = File.join(flutter_application_path, '.ios', 'Flutter')
