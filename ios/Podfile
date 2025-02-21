@@ -11,6 +11,4 @@ target 'Runner' do
   flutter_application_path = File.absolute_path(File.join(flutter_root, '..'))
   ios_frameworks_path = File.join(flutter_application_path, '.ios', 'Flutter')
     
-  pod 'shared_preferences_foundation'
-  
 end
