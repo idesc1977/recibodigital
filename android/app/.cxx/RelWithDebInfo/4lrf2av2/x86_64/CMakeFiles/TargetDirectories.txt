@@ -1,0 +1,2 @@
+C:/inetpub/wwwroot/Flutter/recibo_digital/android/app/.cxx/RelWithDebInfo/4lrf2av2/x86_64/CMakeFiles/edit_cache.dir
+C:/inetpub/wwwroot/Flutter/recibo_digital/android/app/.cxx/RelWithDebInfo/4lrf2av2/x86_64/CMakeFiles/rebuild_cache.dir

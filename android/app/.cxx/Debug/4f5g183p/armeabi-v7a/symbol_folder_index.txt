@@ -1,0 +1,1 @@
+C:\inetpub\wwwroot\Flutter\recibo_digital\build\app\intermediates\cxx\Debug\4f5g183p\obj\armeabi-v7a
