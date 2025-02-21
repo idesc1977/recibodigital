@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "795591101758",
+    "project_id": "recibo-digital-838ac",
+    "storage_bucket": "recibo-digital-838ac.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:795591101758:android:0b5a1d9f97729c2248706f",
+        "android_client_info": {
+          "package_name": "com.ar.emicardigital.recibo_digital"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD7fyR0os7ugQr1vZl3rvg1YL8PV19jvKA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

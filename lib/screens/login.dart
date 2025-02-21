@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert'; // Para manejar JSON
 import '../globals.dart';
 import 'userdetails.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -75,6 +76,7 @@ class LoginScreenState extends State<LoginScreen> {
           empresa = responseData['Empresa'].toString();
           saveUserData(dni!, email!, token!);
           _showMessage('Bienvenido $nombre $apellido');
+          _registraTopic(propietario!);
 
           if (context.mounted) {
             Navigator.push(
@@ -152,6 +154,16 @@ class LoginScreenState extends State<LoginScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
     );
+  }
+
+  void _registraTopic(String topic) async {
+    final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
+    try {
+      await firebaseMessaging.subscribeToTopic(topic);
+      //print("Suscripción exitosa al topic: $topic");
+    } catch (e) {
+      //print("Error al suscribirse al topic: $e");
+    }
   }
 
   // Guardar Datos
