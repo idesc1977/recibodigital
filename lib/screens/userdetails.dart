@@ -299,6 +299,52 @@ class UserDetailsState extends State<UserDetails> {
                   ],
                 ),
               ),
+              SizedBox(height: 10),
+              RichText(
+                text: TextSpan(
+                  text: "CUIL: ", // Label en estilo normal
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.normal,
+                    color: Colors.black, // Color negro para el label
+                  ),
+                  children: [
+                    TextSpan(
+                      text: cuil, // Valor en azul claro
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight:
+                            FontWeight.normal, // Mantiene el peso normal
+                        color:
+                            Colors.lightBlue, // Color azul claro para el valor
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 10),
+              RichText(
+                text: TextSpan(
+                  text: "Legajo: ", // Label en estilo normal
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.normal,
+                    color: Colors.black, // Color negro para el label
+                  ),
+                  children: [
+                    TextSpan(
+                      text: legajo, // Valor en azul claro
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight:
+                            FontWeight.normal, // Mantiene el peso normal
+                        color:
+                            Colors.lightBlue, // Color azul claro para el valor
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               SizedBox(height: 50),
               // Línea separadora horizontal
               Divider(

@@ -74,6 +74,8 @@ class LoginScreenState extends State<LoginScreen> {
           email = responseData['Email'].toString();
           sexo = responseData['Sexo'].toString();
           empresa = responseData['Empresa'].toString();
+          cuil = responseData['CUIL'].toString();
+          legajo = responseData['Legajo'].toString();
           saveUserData(dni!, email!, token!);
           _showMessage('Bienvenido $nombre $apellido');
           _registraTopic(propietario!);

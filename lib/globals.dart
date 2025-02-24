@@ -16,6 +16,8 @@ String? telefono;
 String? email;
 String? sexo;
 String? empresa;
+String? cuil;
+String? legajo;
 int? idconversacion;
 
 void resetGlobalVariables() {
@@ -33,6 +35,8 @@ void resetGlobalVariables() {
   email = '';
   sexo = '';
   empresa = '';
+  cuil = '';
+  legajo = '';
   idconversacion = 0;
 }
 
