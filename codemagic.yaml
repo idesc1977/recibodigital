@@ -9,7 +9,7 @@ workflows:
         BUNDLE_ID: "com.ar.emicardigital.recibodigital"
       groups:
         - app_store_connect_credentials
-      
+
     scripts:
       - name: Instalar dependencias de Flutter
         script: |
@@ -23,49 +23,32 @@ workflows:
       - name: Instalar dependencias de iOS
         script: |
           cd ios
-          pod repo update
           pod install
 
-      - name: Compilar con Flutter sin firmar
+      - name: Build y firmar IPA automáticamente
         script: |
-          flutter build ios --release --no-codesign
-
-      - name: Crear archivo .xcarchive
-        script: |
-          xcodebuild archive \
-            -project ios/Runner.xcodeproj \
-            -scheme Runner \
-            -configuration Release \
-            -archivePath build/ios/archive/Runner.xcarchive \
-            -destination "generic/platform=iOS" \
-            -allowProvisioningUpdates \
-            -allowProvisioningDeviceRegistration \
-            -skipUnavailableActions \
-            DEVELOPMENT_TEAM=ZU63U9L4QR \
-            CODE_SIGN_STYLE=Automatic
-
-          
-      - name: Exportar IPA firmado automáticamente
-        script: |
-          xcodebuild -exportArchive \
-            -archivePath build/ios/archive/Runner.xcarchive \
-            -exportOptionsPlist ios/ExportOptions.plist \
-            -exportPath build/ios/ipa
+          flutter build ipa \
+            --release \
+            --export-options-plist=ios/ExportOptions.plist
 
     artifacts:
       - build/ios/ipa/*.ipa
-      - build/ios/iphoneos/*.app
-      - build/ios/archive/*.xcarchive
 
-publishing:
+    code_signing:
+      certificate: "Certificado_Recibo_Digital"
+      provisioning_profile:
+        app_identifier: "com.ar.emicardigital.recibodigital"
+        type: "app_store"
+
+    publishing:
       app_store_connect:
         auth:
-          key_id: "QQ4RL9JCF6"
-          issuer_id: "cebc2c1b-152d-4395-a8d1-7450a3796177"
-          private_key: "MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQglMnn+drtsgAYV+M0BUutckvm360h4G/RiNknHVsH/fugCgYIKoZIzj0DAQehRANCAART+v1fA5Ffiooji8Hwh8NxP4RduZvXg4/1X3I+y1AGo19yV35DaXJnFoRHhjtoIidVyNOXmFOjAbhBYkpRq5O9"
+          key_id: $APP_STORE_KEY_ID
+          issuer_id: $APP_STORE_ISSUER_ID
+          private_key: $APP_STORE_PRIVATE_KEY
         submit_to_testflight: true
         submit_to_app_store: false
 
-email:
-  recipients:
-  - "mercedariodigital@gmail.com"
+    email:
+      recipients:
+        - "mercedariodigital@gmail.com"
