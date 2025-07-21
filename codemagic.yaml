@@ -26,9 +26,21 @@ workflows:
           pod repo update
           pod install
 
-      - name: Compilar IPA para iOS sin firmar
+      - name: Compilar con Flutter sin firmar
         script: |
           flutter build ios --release --no-codesign
+
+      - name: Crear archivo .xcarchive
+        script: |
+          xcodebuild archive \
+            -project ios/Runner.xcodeproj \
+            -scheme Runner \
+            -configuration Release \
+            -archivePath build/ios/archive/Runner.xcarchive \
+            -destination "generic/platform=iOS" \
+            -allowProvisioningUpdates \
+            -allowProvisioningDeviceRegistration \
+            -skipUnavailableActions
           
       - name: Exportar IPA firmado automáticamente
         script: |
