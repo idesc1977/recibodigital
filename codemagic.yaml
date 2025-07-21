@@ -40,7 +40,10 @@ workflows:
             -destination "generic/platform=iOS" \
             -allowProvisioningUpdates \
             -allowProvisioningDeviceRegistration \
-            -skipUnavailableActions
+            -skipUnavailableActions \
+            DEVELOPMENT_TEAM=ZU63U9L4QR \
+            CODE_SIGN_STYLE=Automatic
+
           
       - name: Exportar IPA firmado automáticamente
         script: |
