@@ -23,13 +23,34 @@ workflows:
       - name: Instalar dependencias de iOS
         script: |
           cd ios
+          pod repo update
           pod install
 
-      - name: Build y firmar IPA automáticamente
+      - name: Compilar app sin firmar (Flutter)
         script: |
-          flutter build ipa \
-            --release \
-            --export-options-plist=ios/ExportOptions.plist
+          flutter build ios --release --no-codesign
+
+      - name: Crear archivo .xcarchive con firma de distribución
+        script: |
+          xcodebuild archive \
+            -project ios/Runner.xcodeproj \
+            -scheme Runner \
+            -configuration Release \
+            -archivePath build/ios/archive/Runner.xcarchive \
+            -destination 'generic/platform=iOS' \
+            -allowProvisioningUpdates \
+            -skipUnavailableActions \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
+            PROVISIONING_PROFILE_SPECIFIER="Pro_Pro_Recibo_Digital" \
+            DEVELOPMENT_TEAM=ZU63U9L4QR
+
+      - name: Exportar IPA firmado
+        script: |
+          xcodebuild -exportArchive \
+            -archivePath build/ios/archive/Runner.xcarchive \
+            -exportOptionsPlist ios/ExportOptions.plist \
+            -exportPath build/ios/ipa
 
     artifacts:
       - build/ios/ipa/*.ipa
