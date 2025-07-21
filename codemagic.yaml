@@ -2,20 +2,13 @@ workflows:
   ios_release:
     name: "Flutter iOS Build"
     environment:
-      flutter: stable  # Puedes especificar una versión, por ejemplo, "3.16.0"
-      xcode: latest  # O una versión específica como "15.0"
-      cocoapods: default  # CocoaPods ya está instalado en Codemagic
+      flutter: stable
+      xcode: latest
+      cocoapods: default
       vars:
-        BUNDLE_ID: "com.ar.emicardigital.recibodigital"  # Reemplaza con tu Bundle ID
-
-    triggering:
-      events:
-        - push
-        - pull_request
-      branch_patterns:
-        - pattern: "*"
-          include: true
-          source: true
+        BUNDLE_ID: "com.ar.emicardigital.recibodigital"
+      groups:
+        - app_store_connect_credentials
 
     scripts:
       - name: Instalar dependencias de Flutter
@@ -26,26 +19,31 @@ workflows:
       - name: Fix CocoaPods Configuration
         script: |
           echo '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"' >> ios/Flutter/Release.xcconfig
-          
+
       - name: Instalar dependencias de iOS
         script: |
           cd ios
           pod repo update
           pod install
 
-      - name: Compilar IPA para iOS
+      - name: Compilar IPA para iOS sin firmar (firma la hace Codemagic)
         script: |
-          flutter build ios --no-codesign
-
-      - name: Exportar binarios
-        script: |
-          mkdir -p build_output
-          cp -r build/ios/iphoneos/ build_output/
+          flutter build ios --release --no-codesign
 
     artifacts:
-      - build_output/**
+      - build/ios/ipa/*.ipa
+      - build/ios/iphoneos/*.app
+      - build/ios/archive/*.xcarchive
 
-    publishing:
-      email:
-        recipients:
-          - "mercedariodigital@gmail.com"  # Cambia esto para recibir notificaciones
+publishing:
+      app_store_connect:
+        auth:
+          key_id: "QQ4RL9JCF6"
+          issuer_id: "cebc2c1b-152d-4395-a8d1-7450a3796177"
+          private_key: "MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQglMnn+drtsgAYV+M0BUutckvm360h4G/RiNknHVsH/fugCgYIKoZIzj0DAQehRANCAART+v1fA5Ffiooji8Hwh8NxP4RduZvXg4/1X3I+y1AGo19yV35DaXJnFoRHhjtoIidVyNOXmFOjAbhBYkpRq5O9"
+        submit_to_testflight: true
+        submit_to_app_store: false
+
+email:
+  recipients:
+  - "mercedariodigital@gmail.com"
