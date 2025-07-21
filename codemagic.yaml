@@ -9,6 +9,7 @@ workflows:
         BUNDLE_ID: "com.ar.emicardigital.recibodigital"
       groups:
         - app_store_connect_credentials
+        - manual_signing_credentials
 
     scripts:
       - name: Instalar dependencias de Flutter
@@ -42,7 +43,7 @@ workflows:
             -skipUnavailableActions \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Apple Distribution" \
-            PROVISIONING_PROFILE_SPECIFIER="Pro_Pro_Recibo_Digital" \
+            PROVISIONING_PROFILE="${PROFILE_UUID}" \
             DEVELOPMENT_TEAM=ZU63U9L4QR
 
       - name: Exportar IPA firmado
