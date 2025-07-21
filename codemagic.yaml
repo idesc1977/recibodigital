@@ -8,7 +8,6 @@ workflows:
       vars:
         BUNDLE_ID: "com.ar.emicardigital.recibodigital"
       groups:
-        - app_store_connect_credentials
         - manual_signing_credentials
 
     scripts:
