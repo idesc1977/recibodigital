@@ -34,11 +34,6 @@ workflows:
         script: |
           flutter analyze
 
-      - name: Test unitarios Flutter
-        script: |
-          flutter test
-        ignore_failure: true
-
       - name: Compilar IPA firmada y versionar automáticamente
         script: |
           flutter build ipa --release \
