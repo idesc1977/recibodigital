@@ -1,69 +1,67 @@
 workflows:
-  ios_release:
-    name: "Flutter iOS Build"
+  ios-workflow:
+    name: ReciboDigital iOS Build
+    instance_type: mac_mini_m2
+    max_build_duration: 120
+
+    integrations:
+      app_store_connect: codemagic
+
     environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.ar.emicardigital.recibodigital
+      vars:
+        APP_ID: 6748967014  # <-- Reemplazá por tu App ID numérico real de App Store Connect
       flutter: stable
       xcode: latest
       cocoapods: default
-      vars:
-        BUNDLE_ID: "com.ar.emicardigital.recibodigital"
-      groups:
-        - manual_signing_credentials
 
     scripts:
-      - name: Instalar dependencias de Flutter
+      - name: Configurar firma automática en Xcode
         script: |
-          flutter clean
+          xcode-project use-profiles
+
+      - name: Obtener paquetes Flutter
+        script: |
           flutter pub get
 
-      - name: Fix CocoaPods Configuration
+      - name: Instalar pods iOS
         script: |
-          echo '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"' >> ios/Flutter/Release.xcconfig
+          find . -name "Podfile" -execdir pod install \;
 
-      - name: Instalar dependencias de iOS
+      - name: Análisis estático Flutter
         script: |
-          cd ios
-          pod repo update
-          pod install
+          flutter analyze
 
-      - name: Compilar app sin firmar (Flutter)
+      - name: Test unitarios Flutter
         script: |
-          flutter build ios --release --no-codesign
+          flutter test
+        ignore_failure: true
 
-      - name: Crear archivo .xcarchive con firma de distribución
+      - name: Compilar IPA firmada y versionar automáticamente
         script: |
-          xcodebuild archive \
-            -project ios/Runner.xcodeproj \
-            -scheme Runner \
-            -configuration Release \
-            -archivePath build/ios/archive/Runner.xcarchive \
-            -destination 'generic/platform=iOS' \
-            -allowProvisioningUpdates \
-            -skipUnavailableActions \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="Apple Distribution" \
-            PROVISIONING_PROFILE="${PROFILE_UUID}" \
-            DEVELOPMENT_TEAM=ZU63U9L4QR
-
-      - name: Exportar IPA firmado
-        script: |
-          xcodebuild -exportArchive \
-            -archivePath build/ios/archive/Runner.xcarchive \
-            -exportOptionsPlist ios/ExportOptions.plist \
-            -exportPath build/ios/ipa
+          flutter build ipa --release \
+            --build-name=1.0.0 \
+            --build-number=$(($(app-store-connect get-latest-testflight-build-number --platform=IOS "$APP_ID") + 1)) \
+            --export-options-plist=/Users/builder/export_options.plist
 
     artifacts:
       - build/ios/ipa/*.ipa
-        
-publishing:
-  app_store_connect:
-    auth:
-      key_id: $APP_STORE_KEY_ID
-      issuer_id: $APP_STORE_ISSUER_ID
-      private_key: $APP_STORE_PRIVATE_KEY
-    submit_to_testflight: true
-    submit_to_app_store: false
+      - /tmp/xcodebuild_logs/*.log
+      - flutter_drive.log
 
-email:
-  recipients:
-    - "mercedariodigital@gmail.com"
+    publishing:
+      email:
+        recipients:
+          - mercedariodigital@gmail.com
+        notify:
+          success: true
+          failure: true
+
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        beta_groups:
+          - Internal Testers
+        submit_to_app_store: false
