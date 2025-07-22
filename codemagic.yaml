@@ -5,7 +5,7 @@ workflows:
     max_build_duration: 120
 
     integrations:
-      app_store_connect: codemagic
+      app_store_connect: ReciboDigital iOS Build
 
     environment:
       ios_signing:
