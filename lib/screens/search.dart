@@ -65,7 +65,7 @@ class SearchState extends State<Search> {
     }
   }
 
-  Future<void> firmarPDF(String id) async {
+  Future<void> firmarPDF(String id, int conformidad) async {
     final url = 'https://www.emicardigital.com.ar/recibodigital/api/firma';
     final token_ = '$token';
 
@@ -75,7 +75,8 @@ class SearchState extends State<Search> {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: json.encode({'Id': id, 'Token': token_}),
+        body: json
+            .encode({'Id': id, 'Token': token_, 'Conformidad': conformidad}),
       );
 
       final responseData = json.decode(response.body);
@@ -86,6 +87,14 @@ class SearchState extends State<Search> {
             await launchUrl(Uri.parse(downloadUrl),
                 mode: LaunchMode.externalApplication);
             _showMessage('Firmando Recibo N°: $id');
+            // 🔹 **Actualizar la lista de invoices**
+            setState(() {
+              for (var invoice in invoices) {
+                if (invoice['Id'].toString() == id) {
+                  invoice['Estado_Firma'] = 1; // Cambiar estado a "Firmado"
+                }
+              }
+            });
           } else {
             _showMessage('No se pudo descargar el archivo');
           }
@@ -191,7 +200,7 @@ class SearchState extends State<Search> {
                                         height: 50,
                                       ),
                                       title: Text(
-                                        'Período: ${invoice['Periodo'] ?? 'N/A'}  ${invoice['SAC'] == '' ? '' : ' - Liquidación: ${invoice['SAC']}'}',
+                                        'Período: ${invoice['Periodo'] ?? 'N/A'} ${invoice['SAC'] == '' ? '' : '- ${invoice['SAC']}'}',
                                       ),
                                       subtitle: Column(
                                         crossAxisAlignment:
@@ -207,30 +216,61 @@ class SearchState extends State<Search> {
                                     const SizedBox(
                                         height:
                                             8.0), // Espacio entre el contenido y los botones
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
+                                    Column(
                                       children: [
-                                        ElevatedButton(
-                                          onPressed: () {
-                                            // Acción para el botón "Visualizar"
-                                            final id = invoice['Id'].toString();
-                                            descargarPDF(id);
-                                          },
-                                          child: const Text('Visualizar'),
+                                        // Botón "Visualizar" ocupando todo el ancho
+                                        SizedBox(
+                                          width: double.infinity,
+                                          child: ElevatedButton(
+                                            onPressed: () {
+                                              final id =
+                                                  invoice['Id'].toString();
+                                              descargarPDF(id);
+                                            },
+                                            child: const Text('Visualizar'),
+                                          ),
                                         ),
                                         const SizedBox(
-                                            width:
-                                                16.0), // Espacio entre los botones
-                                        ElevatedButton(
-                                          onPressed: () {
-                                            // Acción para el botón "Firmar"
-                                            final id = invoice['Id'].toString();
-                                            firmarPDF(id);
-                                          },
-                                          child:
-                                              const Text('Firmar y Descargar'),
-                                        ),
+                                            height:
+                                                8.0), // Espacio entre los botones
+
+                                        // Segunda columna con los botones de firma (solo si Estado_Firma == 0)
+                                        if (invoice['Estado_Firma'] == 0)
+                                          Column(
+                                            children: [
+                                              SizedBox(
+                                                width: double.infinity,
+                                                child: ElevatedButton(
+                                                  onPressed: () {
+                                                    final id = invoice['Id']
+                                                        .toString();
+                                                    firmarPDF(id, 1);
+                                                  },
+                                                  child: const Text(
+                                                    'Firmar Conforme',
+                                                    textAlign: TextAlign.center,
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(
+                                                  height:
+                                                      8.0), // Espacio entre los botones
+                                              SizedBox(
+                                                width: double.infinity,
+                                                child: ElevatedButton(
+                                                  onPressed: () {
+                                                    final id = invoice['Id']
+                                                        .toString();
+                                                    firmarPDF(id, 0);
+                                                  },
+                                                  child: const Text(
+                                                    'Firmar en Disconformidad',
+                                                    textAlign: TextAlign.center,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                       ],
                                     ),
                                   ],

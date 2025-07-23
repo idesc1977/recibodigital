@@ -21,6 +21,9 @@ Future<void> main() async {
   //Inicializar Firebase
   await Firebase.initializeApp();
 
+  // 🔐 Solicitar permiso de notificaciones desde Firebase (clave en iOS)
+  await FirebaseMessaging.instance.requestPermission();
+
   // Inicializar notificaciones locales y Firebase Messaging
   await _initializeNotifications();
 

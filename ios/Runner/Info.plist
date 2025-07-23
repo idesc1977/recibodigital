@@ -45,5 +45,19 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- Permite que la app reciba notificaciones en segundo plano -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
+
+	<!-- Habilita que Firebase maneje automáticamente los eventos de notificación -->
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<true/>
+
+	<!-- Descripción del permiso de notificaciones (visible al usuario la primera vez) -->
+	<key>NSPushNotificationUsageDescription</key>
+	<string>Esta aplicación desea enviarte notificaciones importantes.</string>
+
 </dict>
 </plist>
