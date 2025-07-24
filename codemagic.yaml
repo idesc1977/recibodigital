@@ -33,11 +33,6 @@ workflows:
       - name: Análisis estático Flutter
         script: |
           flutter analyze
-          
-      - name: Copiar GoogleService-Info.plist al bundle iOS
-        script: |
-          echo "🔄 Copiando GoogleService-Info.plist al Runner..."
-          cp ios/Runner/GoogleService-Info.plist ios/Runner/GoogleService-Info.plist
 
       - name: Compilar IPA firmada y versionar automáticamente
         script: |
