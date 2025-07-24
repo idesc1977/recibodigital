@@ -45,19 +45,43 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	<!-- Permite que la app reciba notificaciones en segundo plano -->
+
+	<!-- 🔔 Notificaciones push en segundo plano -->
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
 	</array>
 
-	<!-- Habilita que Firebase maneje automáticamente los eventos de notificación -->
+	<!-- 🔥 Firebase: permite que maneje automáticamente eventos de notificación -->
 	<key>FirebaseAppDelegateProxyEnabled</key>
 	<true/>
 
-	<!-- Descripción del permiso de notificaciones (visible al usuario la primera vez) -->
+	<!-- 📣 Descripción visible al usuario cuando se pide permiso para notificaciones -->
 	<key>NSPushNotificationUsageDescription</key>
 	<string>Esta aplicación desea enviarte notificaciones importantes.</string>
+
+	<!-- 🌐 Seguridad de red: permite conexiones HTTP no seguras si es necesario -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+
+	<!-- 🧭 Si usás ubicación con permission_handler -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Necesitamos acceder a tu ubicación mientras usás la app.</string>
+
+	<!-- 📷 Si en el futuro usás cámara -->
+	<key>NSCameraUsageDescription</key>
+	<string>Necesitamos acceder a la cámara para capturar imágenes o videos.</string>
+
+	<!-- 🎤 Si usás micrófono (para audio en chat, etc.) -->
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Necesitamos acceder al micrófono para grabar audio.</string>
+
+	<!-- 📈 Rastreo de usuario si usás analytics o anuncios -->
+	<key>NSUserTrackingUsageDescription</key>
+	<string>Esta app desea rastrear tu actividad para mejorar la experiencia.</string>
 
 </dict>
 </plist>
