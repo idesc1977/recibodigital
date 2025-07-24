@@ -13,86 +13,82 @@ import 'screens/chat.dart';
 import 'screens/logout.dart';
 import '../globals.dart';
 
-/// Inicializaciones globales
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
-/// Punto de entrada de la app con manejo de errores global
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
     runApp(ErrorApp(details.exceptionAsString()));
   };
 
   runZonedGuarded(() async {
-    runApp(const AppEntryPoint());
-  }, (error, stackTrace) {
+    runApp(const LoadingApp());
+
+    await _initializeApp();
+
+    runApp(const MyApp());
+  }, (error, stack) {
     runApp(ErrorApp(error.toString()));
   });
 }
 
-/// Inicializa las notificaciones locales
-Future<void> _initializeNotifications() async {
-  const AndroidInitializationSettings initializationSettingsAndroid =
-      AndroidInitializationSettings('@mipmap/ic_launcher');
+Future<void> _initializeApp() async {
+  await requestNotificationPermission();
 
-  const InitializationSettings initializationSettings = InitializationSettings(
-    android: initializationSettingsAndroid,
-  );
+  await Firebase.initializeApp();
+  await FirebaseMessaging.instance.requestPermission();
 
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  await _initializeNotifications();
+  _setupMessageListeners();
+  resetGlobalVariables();
+  await _getDeviceToken();
+  await _clearChatHistory();
 }
 
-/// Configura los listeners de mensajes de Firebase Messaging
-void _setupMessageListeners() {
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
-    if (message.notification != null) {
-      const AndroidNotificationDetails androidNotificationDetails =
-          AndroidNotificationDetails(
-        'channel_id',
-        'channel_name',
-        importance: Importance.max,
-        priority: Priority.high,
-      );
+/// App que se muestra mientras se inicializa
+class LoadingApp extends StatelessWidget {
+  const LoadingApp({super.key});
 
-      const NotificationDetails notificationDetails = NotificationDetails(
-        android: androidNotificationDetails,
-      );
-
-      await flutterLocalNotificationsPlugin.show(
-        message.hashCode,
-        message.notification?.title,
-        message.notification?.body,
-        notificationDetails,
-      );
-    }
-  });
-
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-}
-
-/// Maneja mensajes recibidos en background
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  if (message.notification != null) {
-    // Procesar notificación si es necesario
-  }
-  if (message.data.isNotEmpty) {
-    // Procesar datos adicionales
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      ),
+    );
   }
 }
 
-/// Borra historial de chat
-Future<void> _clearChatHistory() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.remove("chat_history");
-}
+/// App que se muestra cuando ocurre un error grave
+class ErrorApp extends StatelessWidget {
+  final String errorMessage;
+  const ErrorApp(this.errorMessage, {super.key});
 
-/// Solicita permiso de notificaciones (iOS)
-Future<void> requestNotificationPermission() async {
-  if (await Permission.notification.request().isGranted) {
-    // Permiso concedido
-  } else {
-    // Permiso denegado
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        backgroundColor: Colors.red[50],
+        appBar: AppBar(
+          title: const Text('🚨 Error de Inicialización'),
+          backgroundColor: Colors.red,
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: SingleChildScrollView(
+            child: Text(
+              'Ocurrió un error al iniciar la app:\n\n$errorMessage',
+              style: const TextStyle(fontSize: 16, color: Colors.red),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -119,93 +115,63 @@ class MyApp extends StatelessWidget {
   }
 }
 
-/// App que muestra errores en pantalla
-class ErrorApp extends StatelessWidget {
-  final String errorMessage;
-  const ErrorApp(this.errorMessage, {super.key});
+// Inicializaciones
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        backgroundColor: Colors.red[50],
-        appBar: AppBar(title: const Text('🚨 Error de Inicialización')),
-        body: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: SingleChildScrollView(
-            child: Text(
-              'Ocurrió un error al iniciar la aplicación:\n\n$errorMessage',
-              style: const TextStyle(fontSize: 16, color: Colors.red),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+Future<void> _initializeNotifications() async {
+  const AndroidInitializationSettings initializationSettingsAndroid =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+
+  const InitializationSettings initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+  );
+
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 }
 
-/// AppEntryPoint: espera a que Firebase y el token estén listos
-class AppEntryPoint extends StatefulWidget {
-  const AppEntryPoint({super.key});
+void _setupMessageListeners() {
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+    if (message.notification != null) {
+      const AndroidNotificationDetails androidDetails =
+          AndroidNotificationDetails(
+        'channel_id',
+        'channel_name',
+        importance: Importance.max,
+        priority: Priority.high,
+      );
 
-  @override
-  State<AppEntryPoint> createState() => _AppEntryPointState();
-}
+      const NotificationDetails platformDetails = NotificationDetails(
+        android: androidDetails,
+      );
 
-class _AppEntryPointState extends State<AppEntryPoint> {
-  bool _ready = false;
-  String? _error;
-
-  @override
-  void initState() {
-    super.initState();
-    _initialize();
-  }
-
-  Future<void> _initialize() async {
-    try {
-      WidgetsFlutterBinding.ensureInitialized();
-
-      // Pedir permisos
-      await requestNotificationPermission();
-
-      // Inicializar Firebase y permisos
-      await Firebase.initializeApp();
-      await FirebaseMessaging.instance.requestPermission();
-
-      // Obtener token FCM
-      tokenfirebase = await FirebaseMessaging.instance.getToken();
-
-      // Inicializaciones extra
-      await _initializeNotifications();
-      _setupMessageListeners();
-      resetGlobalVariables();
-      await _clearChatHistory();
-
-      setState(() {
-        _ready = true;
-      });
-    } catch (e) {
-      setState(() {
-        _error = e.toString();
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_error != null) {
-      return ErrorApp(_error!);
-    }
-
-    if (!_ready) {
-      return const MaterialApp(
-        home: Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        ),
+      await flutterLocalNotificationsPlugin.show(
+        message.hashCode,
+        message.notification?.title,
+        message.notification?.body,
+        platformDetails,
       );
     }
+  });
 
-    return const MyApp(); // <- App principal cuando todo está listo
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+}
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // Procesamiento en segundo plano (opcional)
+}
+
+Future<void> _getDeviceToken() async {
+  try {
+    tokenfirebase = await FirebaseMessaging.instance.getToken();
+  } catch (e) {
+    // No hacer nada por ahora
   }
+}
+
+Future<void> _clearChatHistory() async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove("chat_history");
+}
+
+Future<void> requestNotificationPermission() async {
+  await Permission.notification.request();
 }
