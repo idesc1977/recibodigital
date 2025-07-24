@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert'; // Para manejar JSON
+import 'dart:convert';
 import '../globals.dart';
 import 'userdetails.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -16,8 +16,8 @@ class LoginScreen extends StatefulWidget {
 class LoginScreenState extends State<LoginScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _isLoading = false; // Indicador de carga
-  bool _isLoading2 = false; // Indicador de carga
+  bool _isLoading = false;
+  bool _isLoading2 = false;
   String? fotoUrl;
   String? emailUser;
   String? tokenUser;
@@ -25,7 +25,7 @@ class LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    _loadFotoUrl(); // Cargar la URL desde SharedPreferences
+    _loadFotoUrl();
   }
 
   Future<void> _login(BuildContext context) async {
@@ -43,11 +43,9 @@ class LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      // URL de la API
       final Uri url =
           Uri.parse('https://www.emicardigital.com.ar/recibodigital/api/login');
 
-      // Solicitud POST
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
@@ -116,11 +114,9 @@ class LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      // URL de la API
       final Uri url = Uri.parse(
           'https://www.emicardigital.com.ar/recibodigital/api/forgetpassword');
 
-      // Solicitud POST
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
@@ -131,15 +127,7 @@ class LoginScreenState extends State<LoginScreen> {
 
       final responseData = json.decode(response.body);
       if (response.statusCode == 200) {
-        if (responseData['Success'] == true) {
-          if (responseData['Procesado'] == true) {
-            _showMessage(responseData['Respuesta']);
-          } else {
-            _showMessage(responseData['Respuesta']);
-          }
-        } else {
-          _showMessage(responseData['Respuesta']);
-        }
+        _showMessage(responseData['Respuesta']);
       } else {
         _showMessage('Token inválido.');
       }
@@ -153,6 +141,7 @@ class LoginScreenState extends State<LoginScreen> {
   }
 
   void _showMessage(String message) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
     );
@@ -162,13 +151,9 @@ class LoginScreenState extends State<LoginScreen> {
     final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
     try {
       await firebaseMessaging.subscribeToTopic(topic);
-      //print("Suscripción exitosa al topic: $topic");
-    } catch (e) {
-      //print("Error al suscribirse al topic: $e");
-    }
+    } catch (_) {}
   }
 
-  // Guardar Datos
   Future<void> saveUserData(String dni, String email, String token) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(
@@ -177,14 +162,12 @@ class LoginScreenState extends State<LoginScreen> {
     await prefs.setString('token', token);
   }
 
-  //Obtiene Datos
   Future<void> _loadFotoUrl() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      fotoUrl = prefs.getString('fotoURL') ?? ''; // Obtener fotoURL o vacío
-      emailUser = prefs.getString('email') ?? ''; // Obtener el usuario o email
-      tokenUser = prefs.getString('token') ??
-          ''; // Obtener el token (GUID) del dispositivo
+      fotoUrl = prefs.getString('fotoURL') ?? '';
+      emailUser = prefs.getString('email') ?? '';
+      tokenUser = prefs.getString('token') ?? '';
       _usernameController.text = emailUser!;
     });
   }
@@ -193,116 +176,139 @@ class LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Inicio de Sesión", style: TextStyle(color: Colors.white)),
+        title: const Text("Inicio de Sesión",
+            style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.blue,
-        automaticallyImplyLeading: false, // Elimina la flecha de regreso
+        automaticallyImplyLeading: false,
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment:
-                CrossAxisAlignment.stretch, // Ajusta al ancho del contenedor
-            children: [
-              // Logo de la empresa
-              Image.asset(
-                'images/logo.png',
-                height: 100,
-                fit: BoxFit.contain, // Ajusta el tamaño de la imagen
+      body: Builder(
+        builder: (context) {
+          try {
+            return _buildLoginUI(context);
+          } catch (error, stackTrace) {
+            return _buildErrorScreen(error, stackTrace);
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildLoginUI(BuildContext context) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Image.asset(
+              'images/logo.png',
+              height: 100,
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(height: 20),
+            Center(
+              child: CircleAvatar(
+                radius: 50,
+                backgroundImage: (fotoUrl != null && fotoUrl!.isNotEmpty)
+                    ? NetworkImage(fotoUrl!)
+                    : const AssetImage('images/login.png') as ImageProvider,
+                backgroundColor: const Color.fromARGB(255, 250, 249, 249),
               ),
-              SizedBox(height: 20), // Espaciado entre logo y botón
-              // Imagen circular
-              Center(
-                child: CircleAvatar(
-                  radius: 50, // Tamaño del avatar
-                  backgroundImage: (fotoUrl != null && fotoUrl!.isNotEmpty)
-                      ? NetworkImage(fotoUrl!) // Si tiene URL, cargarla
-                      : AssetImage('images/login.png')
-                          as ImageProvider, // Si no, cargar el asset
-                  backgroundColor: const Color.fromARGB(255, 250, 249,
-                      249), // Color de fondo si la imagen no carga
-                ),
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: _usernameController,
+              decoration: const InputDecoration(
+                labelText: 'Usuario',
+                border: OutlineInputBorder(),
               ),
-              SizedBox(height: 20), // Espaciado
-              // Espacio entre la imagen y los campos de texto
-              TextField(
-                controller: _usernameController,
-                decoration: InputDecoration(
-                  labelText: 'Usuario',
-                  border: OutlineInputBorder(),
-                ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _passwordController,
+              decoration: const InputDecoration(
+                labelText: 'Contraseña',
+                border: OutlineInputBorder(),
               ),
-              SizedBox(height: 16),
-              TextField(
-                controller: _passwordController,
-                decoration: InputDecoration(
-                  labelText: 'Contraseña',
-                  border: OutlineInputBorder(),
-                ),
-                obscureText: true, // Oculta el texto para contraseñas
-              ),
-              SizedBox(height: 16),
-              _isLoading
-                  ? Center(
-                      child: SizedBox(
-                        width: 24, // Tamaño del indicador
-                        height: 24,
-                        child: CircularProgressIndicator(strokeWidth: 3),
-                      ),
-                    )
-                  : ElevatedButton(
-                      onPressed: () {
-                        _login(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            Colors.lightBlue, // Color de fondo rojo
-                        foregroundColor: Colors.white, // Color del texto blanco
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              8), // Bordes redondeados opcionales
-                        ),
-                      ),
-                      child: Text('Iniciar Sesión'),
+              obscureText: true,
+            ),
+            const SizedBox(height: 16),
+            _isLoading
+                ? const Center(
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 3),
                     ),
-              SizedBox(height: 50),
-              // Línea separadora horizontal
-              Divider(
-                thickness: 2, // Grosor de la línea
-                color: Colors.grey, // Color de la línea
-                indent: 5, // Margen izquierdo
-                endIndent: 5, // Margen derecho
-              ),
-              SizedBox(height: 10),
-              _isLoading2
-                  ? Center(
-                      child: SizedBox(
-                        width: 24, // Tamaño del indicador
-                        height: 24,
-                        child: CircularProgressIndicator(strokeWidth: 3),
+                  )
+                : ElevatedButton(
+                    onPressed: () => _login(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.lightBlue,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                    )
-                  : ElevatedButton(
-                      onPressed: () {
-                        _forgetPassword(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red, // Color de fondo rojo
-                        foregroundColor: Colors.white, // Color del texto blanco
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              8), // Bordes redondeados opcionales
-                        ),
-                      ),
-                      child: const Text('Olvidé mi Password'),
                     ),
-            ],
-          ),
+                    child: const Text('Iniciar Sesión'),
+                  ),
+            const SizedBox(height: 50),
+            const Divider(thickness: 2, color: Colors.grey),
+            const SizedBox(height: 10),
+            _isLoading2
+                ? const Center(
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 3),
+                    ),
+                  )
+                : ElevatedButton(
+                    onPressed: () => _forgetPassword(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text('Olvidé mi Password'),
+                  ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorScreen(Object error, StackTrace stackTrace) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error, color: Colors.red, size: 64),
+            const SizedBox(height: 20),
+            const Text(
+              "Ha ocurrido un error inesperado",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              "$error",
+              style: const TextStyle(color: Colors.black54),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => setState(() {}),
+              child: const Text("Reintentar"),
+            ),
+          ],
         ),
       ),
     );
