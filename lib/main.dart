@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,9 +17,22 @@ import '../globals.dart';
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
+/// Handler de mensajes en segundo plano (DEBE ir en el main)
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // Inicialización necesaria si vas a usar otros servicios de Firebase aquí
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  // Procesamiento en segundo plano (opcional)
+}
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Registrar handler de mensajes en segundo plano ANTES de runApp
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // Captura de errores de Flutter
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
     runApp(ErrorApp(details.exceptionAsString()));
@@ -36,13 +50,22 @@ void main() {
 }
 
 Future<void> _initializeApp() async {
-  await requestNotificationPermission();
+  // Inicializa Firebase primero
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
-  await Firebase.initializeApp();
+  // Luego solicita permisos de notificaciones
+  await requestNotificationPermission();
   await FirebaseMessaging.instance.requestPermission();
 
+  // Inicializar notificaciones locales
   await _initializeNotifications();
+
+  // Configurar listeners de mensajes en foreground
   _setupMessageListeners();
+
+  // Resetear variables globales y otras inicializaciones
   resetGlobalVariables();
   await _getDeviceToken();
   await _clearChatHistory();
@@ -151,19 +174,13 @@ void _setupMessageListeners() {
       );
     }
   });
-
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-}
-
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // Procesamiento en segundo plano (opcional)
 }
 
 Future<void> _getDeviceToken() async {
   try {
     tokenfirebase = await FirebaseMessaging.instance.getToken();
   } catch (e) {
-    // No hacer nada por ahora
+    // Manejo de error silencioso
   }
 }
 
