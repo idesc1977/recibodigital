@@ -13,6 +13,7 @@ workflows:
         bundle_identifier: com.ar.emicardigital.recibodigital
       vars:
         APP_ID: 6748967014  # <-- Reemplazá por tu App ID numérico real de App Store Connect
+        ENTITLEMENTS_PATH: "ios/Runner/Runner.entitlements"
       flutter: stable
       xcode: latest
       cocoapods: default
