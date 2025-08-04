@@ -35,38 +35,76 @@ class _LogoutState extends State<Logout> {
 
   Future<void> _solicitarTokenFCM() async {
     setState(() {
-      _tokenStatus = '⏳ Solicitando token FCM...';
+      _tokenStatus = '⏳ Solicitando tokens...';
     });
 
     try {
       final settings =
           await FirebaseMessaging.instance.getNotificationSettings();
 
-      if (settings.authorizationStatus == AuthorizationStatus.authorized ||
-          settings.authorizationStatus == AuthorizationStatus.provisional) {
-        final token = await FirebaseMessaging.instance.getToken();
-        if (token != null) {
-          setState(() {
-            _tokenStatus = '✅ Token FCM obtenido:\n$token';
-          });
-        } else {
-          setState(() {
-            _tokenStatus =
-                '⚠️ Token FCM nulo. Revisa configuración de APNs y permisos.';
-          });
-        }
-      } else if (settings.authorizationStatus == AuthorizationStatus.denied) {
+      if (settings.authorizationStatus == AuthorizationStatus.denied) {
         setState(() {
-          _tokenStatus = '🚫 Permisos de notificación denegados.';
+          _tokenStatus =
+              '🚫 Permisos de notificación denegados por el usuario.';
         });
-      } else {
-        setState(() {
-          _tokenStatus = '❓ Estado de permisos desconocido.';
-        });
+        return;
       }
+
+      if (settings.authorizationStatus == AuthorizationStatus.notDetermined) {
+        setState(() {
+          _tokenStatus = '❗ Permisos de notificación no solicitados.';
+        });
+        return;
+      }
+
+      // 1. Obtener APNs token (iOS)
+      String? apnsToken;
+      if (Platform.isIOS) {
+        apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+        if (apnsToken == null) {
+          setState(() {
+            _tokenStatus = '''
+❗ El token APNs aún no está disponible.
+Esto es común justo después de iniciar la app por primera vez.
+
+🔁 Por favor, vuelve a intentarlo en unos segundos.
+''';
+          });
+          return;
+        }
+      }
+
+      // 2. Obtener token FCM
+      final fcmToken = await FirebaseMessaging.instance.getToken();
+      if (fcmToken == null) {
+        setState(() {
+          _tokenStatus = '''
+⚠️ Token FCM nulo. Posibles causas:
+- APNs token no válido
+- Error de configuración en Firebase
+- Error en capabilities (Push Notifications)
+
+📱 APNs Token: ${apnsToken ?? 'No disponible'}
+''';
+        });
+        return;
+      }
+
+      // 3. Mostrar ambos tokens
+      setState(() {
+        _tokenStatus = '''
+✅ Tokens obtenidos exitosamente:
+
+📩 FCM Token:
+$fcmToken
+
+📱 APNs Token:
+${apnsToken ?? 'No aplica (Android)'}
+''';
+      });
     } catch (e) {
       setState(() {
-        _tokenStatus = '❌ Error al obtener el token:\n$e';
+        _tokenStatus = '❌ Error al obtener los tokens:\n$e';
       });
     }
   }
@@ -104,10 +142,18 @@ class _LogoutState extends State<Logout> {
                   onPressed: _solicitarTokenFCM,
                 ),
                 const SizedBox(height: 16),
-                Text(
-                  _tokenStatus,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 14),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade400),
+                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.grey.shade50,
+                  ),
+                  child: Text(
+                    _tokenStatus,
+                    textAlign: TextAlign.left,
+                    style: const TextStyle(fontSize: 13),
+                  ),
                 ),
               ],
             ),
