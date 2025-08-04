@@ -35,17 +35,12 @@ workflows:
         script: |
           flutter analyze
 
-      - name: Compilar IPA firmada con Xcode y entitlements
+      - name: Compilar IPA firmada y versionar automáticamente
         script: |
-          flutter build ios --release \
+          flutter build ipa --release \
             --build-name=1.0.0 \
-            --build-number=$(($(app-store-connect get-latest-testflight-build-number --platform=IOS "$APP_ID") + 1))
-
-          xcode-project build-ipa \
-            --project ios/Runner.xcodeproj \
-            --scheme Runner \
-            --export-method app-store \
-            --entitlements "$ENTITLEMENTS_PATH"
+            --build-number=$(($(app-store-connect get-latest-testflight-build-number --platform=IOS "$APP_ID") + 1)) \
+            --export-options-plist=/Users/builder/export_options.plist
             
     artifacts:
       - build/ios/ipa/*.ipa
