@@ -46,7 +46,7 @@ class _LogoutState extends State<Logout> {
         badge: true,
         carPlay: false,
         criticalAlert: false,
-        provisional: true,
+        provisional: false,
         sound: true,
       );
 
@@ -72,13 +72,25 @@ class _LogoutState extends State<Logout> {
       // 3. Obtener token APNs en iOS
       String? apnsToken;
       if (Platform.isIOS) {
-        apnsToken = await FirebaseMessaging.instance.getAPNSToken();
-        if (apnsToken == null) {
+        try {
+          apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+          if (apnsToken == null) {
+            setState(() {
+              _tokenStatus = '''
+        ❗ Token APNs no disponible todavía.
+        🔁 Intenta nuevamente en unos segundos.
+        ''';
+            });
+            return;
+          }
+        } catch (e) {
           setState(() {
             _tokenStatus = '''
-❗ Token APNs no disponible todavía.
-🔁 Intenta nuevamente en unos segundos.
-''';
+        ❌ Error al obtener el token APNs.
+
+        💬 Detalle técnico:
+        $e
+        ''';
           });
           return;
         }
