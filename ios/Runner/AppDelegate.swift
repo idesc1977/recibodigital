@@ -1,42 +1,16 @@
-import UIKit
 import Flutter
-import FirebaseMessaging
-import UserNotifications
+import UIKit
+//import Firebase
+
 
 @main
-@objc class AppDelegate: FlutterAppDelegate, UNUserNotificationCenterDelegate {
-  
+@objc class AppDelegate: FlutterAppDelegate {
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-
-    // Registrar plugin de Flutter
+    //FirebaseApp.configure() // 👈 INICIALIZACIÓN DE FIREBASE
     GeneratedPluginRegistrant.register(with: self)
-
-    // Setear delegado de notificaciones
-    UNUserNotificationCenter.current().delegate = self
-
-    // Pedir permiso de notificaciones
-    let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
-    UNUserNotificationCenter.current().requestAuthorization(
-      options: authOptions,
-      completionHandler: { _, _ in }
-    )
-
-    // Registrar con APNs
-    application.registerForRemoteNotifications()
-
-    // Registrar delegado de FCM (opcional pero recomendable)
-    Messaging.messaging().delegate = self
-
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
-  }
-
-  override func application(_ application: UIApplication,
-                            didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-    // Pasar token APNs a Firebase
-    Messaging.messaging().apnsToken = deviceToken
-    super.application(application, didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
   }
 }
