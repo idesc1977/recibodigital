@@ -245,8 +245,16 @@ void _setupMessageListeners() {
 
 Future<void> _getDeviceToken() async {
   try {
+    if (Platform.isIOS) {
+      String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+
+      // Si no está disponible, espera unos segundos y reintenta
+      if (apnsToken == null) {
+        await Future<void>.delayed(const Duration(seconds: 3));
+        apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+      }
+    }
     tokenfirebase = await FirebaseMessaging.instance.getToken();
-    // print('FCM token: $tokenfirebase');
   } catch (e) {
     // Manejo de error silencioso
   }

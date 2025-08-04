@@ -75,6 +75,11 @@ class _LogoutState extends State<Logout> {
         try {
           apnsToken = await FirebaseMessaging.instance.getAPNSToken();
           debugPrint('📱 APNs token: $apnsToken');
+          if (apnsToken == null) {
+            await Future<void>.delayed(const Duration(seconds: 3));
+            apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+            debugPrint('📱 APNs token (2do intento): $apnsToken');
+          }
         } catch (e) {
           setState(() {
             _tokenStatus = '''
