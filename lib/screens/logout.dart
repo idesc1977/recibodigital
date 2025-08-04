@@ -74,23 +74,26 @@ class _LogoutState extends State<Logout> {
       if (Platform.isIOS) {
         try {
           apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+
           if (apnsToken == null) {
             setState(() {
               _tokenStatus = '''
-        ❗ Token APNs no disponible todavía.
-        🔁 Intenta nuevamente en unos segundos.
-        ''';
+      ❗ El token APNs aún no está disponible.
+      Esto es normal la primera vez que se lanza la app.
+
+      🔁 Intenta nuevamente en unos segundos.
+      ''';
             });
             return;
           }
         } catch (e) {
           setState(() {
             _tokenStatus = '''
-        ❌ Error al obtener el token APNs.
+      ❌ Error al obtener el token APNs.
 
-        💬 Detalle técnico:
-        $e
-        ''';
+      💬 Detalle técnico:
+      $e
+      ''';
           });
           return;
         }
