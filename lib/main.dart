@@ -250,7 +250,7 @@ Future<void> _getDeviceToken() async {
 
       // Si no está disponible, espera unos segundos y reintenta
       if (apnsToken == null) {
-        await Future<void>.delayed(const Duration(seconds: 10));
+        await Future<void>.delayed(const Duration(seconds: 3));
         apnsToken = await FirebaseMessaging.instance.getAPNSToken();
       }
     }
