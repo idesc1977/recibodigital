@@ -204,7 +204,7 @@ Future<void> _requestNotificationPermissions() async {
     badge: true,
     carPlay: false,
     criticalAlert: false,
-    provisional: false,
+    provisional: true,
     sound: true,
   );
 }

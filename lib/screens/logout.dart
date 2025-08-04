@@ -35,54 +35,61 @@ class _LogoutState extends State<Logout> {
 
   Future<void> _solicitarTokenFCM() async {
     setState(() {
-      _tokenStatus = '⏳ Solicitando tokens...';
+      _tokenStatus = '⏳ Solicitando permisos de notificación...';
     });
 
     try {
-      final settings =
-          await FirebaseMessaging.instance.getNotificationSettings();
+      // 1. Solicitar permisos al usuario
+      final settings = await FirebaseMessaging.instance.requestPermission(
+        alert: true,
+        announcement: false,
+        badge: true,
+        carPlay: false,
+        criticalAlert: false,
+        provisional: true,
+        sound: true,
+      );
 
+      // 2. Evaluar el estado de los permisos
       if (settings.authorizationStatus == AuthorizationStatus.denied) {
         setState(() {
-          _tokenStatus =
-              '🚫 Permisos de notificación denegados por el usuario.';
+          _tokenStatus = '🚫 Permisos de notificación denegados.';
         });
         return;
       }
 
       if (settings.authorizationStatus == AuthorizationStatus.notDetermined) {
         setState(() {
-          _tokenStatus = '❗ Permisos de notificación no solicitados.';
+          _tokenStatus = '❗ El usuario aún no decidió sobre los permisos.';
         });
         return;
       }
 
-      // 1. Obtener APNs token (iOS)
+      setState(() {
+        _tokenStatus = '✅ Permisos concedidos.\n⏳ Obteniendo tokens...';
+      });
+
+      // 3. Obtener token APNs en iOS
       String? apnsToken;
       if (Platform.isIOS) {
         apnsToken = await FirebaseMessaging.instance.getAPNSToken();
         if (apnsToken == null) {
           setState(() {
             _tokenStatus = '''
-❗ El token APNs aún no está disponible.
-Esto es común justo después de iniciar la app por primera vez.
-
-🔁 Por favor, vuelve a intentarlo en unos segundos.
+❗ Token APNs no disponible todavía.
+🔁 Intenta nuevamente en unos segundos.
 ''';
           });
           return;
         }
       }
 
-      // 2. Obtener token FCM
+      // 4. Obtener token FCM
       final fcmToken = await FirebaseMessaging.instance.getToken();
       if (fcmToken == null) {
         setState(() {
           _tokenStatus = '''
-⚠️ Token FCM nulo. Posibles causas:
-- APNs token no válido
-- Error de configuración en Firebase
-- Error en capabilities (Push Notifications)
+⚠️ No se pudo obtener el token FCM.
 
 📱 APNs Token: ${apnsToken ?? 'No disponible'}
 ''';
@@ -90,10 +97,10 @@ Esto es común justo después de iniciar la app por primera vez.
         return;
       }
 
-      // 3. Mostrar ambos tokens
+      // 5. Mostrar tokens en pantalla
       setState(() {
         _tokenStatus = '''
-✅ Tokens obtenidos exitosamente:
+✅ Tokens obtenidos correctamente:
 
 📩 FCM Token:
 $fcmToken
@@ -138,7 +145,7 @@ ${apnsToken ?? 'No aplica (Android)'}
                 const Divider(),
                 ElevatedButton.icon(
                   icon: const Icon(Icons.notifications_active),
-                  label: const Text("Solicitar token FCM"),
+                  label: const Text("Solicitar permisos y token FCM"),
                   onPressed: _solicitarTokenFCM,
                 ),
                 const SizedBox(height: 16),
