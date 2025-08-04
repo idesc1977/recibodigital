@@ -74,37 +74,41 @@ class _LogoutState extends State<Logout> {
       if (Platform.isIOS) {
         try {
           apnsToken = await FirebaseMessaging.instance.getAPNSToken();
-
-          if (apnsToken == null) {
-            setState(() {
-              _tokenStatus = '''
-      ❗ El token APNs aún no está disponible.
-      Esto es normal la primera vez que se lanza la app.
-
-      🔁 Intenta nuevamente en unos segundos.
-      ''';
-            });
-            return;
-          }
+          debugPrint('📱 APNs token: $apnsToken');
         } catch (e) {
           setState(() {
             _tokenStatus = '''
-      ❌ Error al obtener el token APNs.
+❌ Error real al obtener el token APNs.
 
-      💬 Detalle técnico:
-      $e
-      ''';
+💬 Detalle técnico:
+$e
+''';
           });
           return;
         }
       }
 
       // 4. Obtener token FCM
-      final fcmToken = await FirebaseMessaging.instance.getToken();
+      String? fcmToken;
+      try {
+        fcmToken = await FirebaseMessaging.instance.getToken();
+        debugPrint('📩 FCM token: $fcmToken');
+      } catch (e) {
+        setState(() {
+          _tokenStatus = '''
+❌ Error real al obtener el token FCM.
+
+💬 Detalle técnico:
+$e
+''';
+        });
+        return;
+      }
+
       if (fcmToken == null) {
         setState(() {
           _tokenStatus = '''
-⚠️ No se pudo obtener el token FCM.
+⚠️ Token FCM es null, sin lanzar excepción.
 
 📱 APNs Token: ${apnsToken ?? 'No disponible'}
 ''';
@@ -126,7 +130,12 @@ ${apnsToken ?? 'No aplica (Android)'}
       });
     } catch (e) {
       setState(() {
-        _tokenStatus = '❌ Error al obtener los tokens:\n$e';
+        _tokenStatus = '''
+❌ Error inesperado al solicitar permisos o tokens.
+
+💬 Detalle técnico:
+$e
+''';
       });
     }
   }
