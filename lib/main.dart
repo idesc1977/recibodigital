@@ -47,7 +47,7 @@ void main() {
   runZonedGuarded(() async {
     runApp(const LoadingApp());
 
-    await _initializeApp();
+    await initializeApp();
 
     runApp(const MyApp());
   }, (error, stack) {
@@ -55,7 +55,7 @@ void main() {
   });
 }
 
-Future<void> _initializeApp() async {
+Future<void> initializeApp() async {
   // 1) Inicializa Firebase primero
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
