@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart'; // Usado SOLO en Android
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,45 +17,15 @@ import 'screens/search.dart';
 import 'screens/notifications.dart';
 import 'screens/chat.dart';
 import 'screens/logout.dart';
-import 'globals.dart';
+import '../globals.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
-/// 🔄 Widget que permite reiniciar toda la app en caliente (iOS)
-class RestartWidget extends StatefulWidget {
-  final Widget child;
-  const RestartWidget({super.key, required this.child});
-
-  static void restartApp(BuildContext context) {
-    context.findAncestorStateOfType<_RestartWidgetState>()?.restartApp();
-  }
-
-  @override
-  State<RestartWidget> createState() => _RestartWidgetState();
-}
-
-class _RestartWidgetState extends State<RestartWidget> {
-  Key key = UniqueKey();
-
-  void restartApp() {
-    setState(() {
-      key = UniqueKey();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return KeyedSubtree(
-      key: key,
-      child: widget.child,
-    );
-  }
-}
-
 /// 👇 Handler de mensajes en segundo plano (DEBE ir en el main)
 @pragma('vm:entry-point') // Necesario para iOS en release
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // Si vas a usar otros servicios de Firebase aquí, inicializa.
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -75,26 +46,40 @@ void main() {
 
   runZonedGuarded(() async {
     runApp(const LoadingApp());
+
     await initializeApp();
-    runApp(RestartWidget(child: const MyApp()));
+
+    runApp(const MyApp());
   }, (error, stack) {
     runApp(ErrorApp(error.toString()));
   });
 }
 
 Future<void> initializeApp() async {
+  // 1) Inicializa Firebase primero
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // 2) Inicializa notificaciones locales (iOS + Android)
   await _initializeLocalNotifications();
+
+  // 3) Pide permisos de notificaciones
+  //    iOS: solo Firebase (NO permission_handler)
+  //    Android: también usamos permission_handler para Android 13+
   await _requestNotificationPermissions();
+
+  // 4) Define cómo se presentan notificaciones en foreground (iOS)
   FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
     alert: true,
     badge: true,
     sound: true,
   );
+
+  // 5) Configurar listeners de mensajes en foreground
   _setupMessageListeners();
 
+  // 6) Resetear variables globales y otras inicializaciones
   resetGlobalVariables();
   await _getDeviceToken();
   await _clearChatHistory();
@@ -172,38 +157,54 @@ class MyApp extends StatelessWidget {
 // ==========================
 
 Future<void> _initializeLocalNotifications() async {
+  // Android
   const AndroidInitializationSettings initializationSettingsAndroid =
       AndroidInitializationSettings('@mipmap/ic_launcher');
 
-  const DarwinInitializationSettings initializationSettingsDarwin =
-      DarwinInitializationSettings(
+  // iOS (Darwin)
+  final DarwinInitializationSettings initializationSettingsDarwin =
+      const DarwinInitializationSettings(
+    // Ponemos false porque pedimos permisos explícitamente nosotros
     requestAlertPermission: false,
     requestBadgePermission: false,
     requestSoundPermission: false,
+    // Si necesitas acciones/categorías, puedes definirlas aquí
   );
 
+  // Inicialización conjunta
   final InitializationSettings initializationSettings = InitializationSettings(
     android: initializationSettingsAndroid,
-    iOS: initializationSettingsDarwin,
+    iOS: initializationSettingsDarwin, // 👈 Esto evita el error en iOS
   );
 
   await flutterLocalNotificationsPlugin.initialize(
     initializationSettings,
-    onDidReceiveNotificationResponse: (NotificationResponse response) async {},
+    // Manejo del tap en notificaciones (Android/iOS modernos)
+    onDidReceiveNotificationResponse: (NotificationResponse response) async {
+      // final payload = response.payload; // Úsalo si envías payloads
+    },
   );
 }
 
 Future<void> _requestNotificationPermissions() async {
+  // iOS: solo Firebase (no permission_handler)
+  // Android: podemos pedir también via permission_handler para Android 13+
   if (Platform.isAndroid) {
+    // En Android 13+ se requiere POST_NOTIFICATIONS en tiempo de ejecución
     final status = await Permission.notification.status;
     if (!status.isGranted) {
       await Permission.notification.request();
     }
   }
 
+  // Pide permisos con Firebase (iOS/Android)
   await FirebaseMessaging.instance.requestPermission(
     alert: true,
+    announcement: false,
     badge: true,
+    carPlay: false,
+    criticalAlert: false,
+    provisional: false,
     sound: true,
   );
 }
@@ -211,6 +212,7 @@ Future<void> _requestNotificationPermissions() async {
 void _setupMessageListeners() {
   FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
     if (message.notification != null) {
+      // Android
       const AndroidNotificationDetails androidDetails =
           AndroidNotificationDetails(
         'channel_id',
@@ -219,6 +221,7 @@ void _setupMessageListeners() {
         priority: Priority.high,
       );
 
+      // iOS (Darwin)
       const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
         presentAlert: true,
         presentBadge: true,
@@ -244,13 +247,17 @@ Future<void> _getDeviceToken() async {
   try {
     if (Platform.isIOS) {
       String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+
+      // Si no está disponible, espera unos segundos y reintenta
       if (apnsToken == null) {
         await Future<void>.delayed(const Duration(seconds: 3));
         apnsToken = await FirebaseMessaging.instance.getAPNSToken();
       }
     }
     tokenfirebase = await FirebaseMessaging.instance.getToken();
-  } catch (_) {}
+  } catch (e) {
+    // Manejo de error silencioso
+  }
 }
 
 Future<void> _clearChatHistory() async {

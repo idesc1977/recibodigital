@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -169,7 +172,27 @@ class LoginScreenState extends State<LoginScreen> {
       emailUser = prefs.getString('email') ?? '';
       tokenUser = prefs.getString('token') ?? '';
       _usernameController.text = emailUser!;
+      if (tokenfirebase == '') {
+        _getDeviceToken();
+      }
     });
+  }
+
+  Future<void> _getDeviceToken() async {
+    try {
+      if (Platform.isIOS) {
+        String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+
+        // Si no está disponible, espera unos segundos y reintenta
+        if (apnsToken == null) {
+          await Future<void>.delayed(const Duration(seconds: 3));
+          apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+        }
+      }
+      tokenfirebase = await FirebaseMessaging.instance.getToken();
+    } catch (e) {
+      // Manejo de error silencioso
+    }
   }
 
   @override

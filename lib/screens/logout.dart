@@ -1,9 +1,9 @@
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../main.dart' show RestartWidget;
 import '../globals.dart';
 import 'menu.dart';
+import 'login.dart';
 
 class Logout extends StatefulWidget {
   const Logout({super.key});
@@ -18,8 +18,11 @@ class _LogoutState extends State<Logout> {
     resetGlobalVariables();
 
     if (Platform.isIOS) {
-      // --- iOS: reinicio total del árbol de widgets ---
-      RestartWidget.restartApp(context);
+      // --- iOS: redirigir a la pantalla de login ---
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+        (_) => false,
+      );
     } else if (Platform.isAndroid) {
       // --- Android: cerrar la app completamente ---
       await Future<void>.delayed(const Duration(milliseconds: 100));
